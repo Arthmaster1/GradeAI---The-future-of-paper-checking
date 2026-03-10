@@ -1135,9 +1135,11 @@
   /* ---- URGENCY BANNER ---- */
   .urgency-banner {
     background: var(--yellow);
-    border-top: 2px solid var(--ink);
     border-bottom: 2px solid var(--ink);
-    padding: 1.5rem 5vw;
+    padding: 0.75rem 5vw;
+    position: sticky;
+    top: 65px;
+    z-index: 99;
   }
 
   .urgency-inner {
@@ -1243,10 +1245,23 @@
     <li><a href="#how">How it Works</a></li>
     <li><a href="#vs">vs ChatGPT</a></li>
     <li><a href="#features">Features</a></li>
-    <li><a href="#subjects">Subjects</a></li>
     <li><a href="coming-soon.html" class="nav-cta">Try for Free →</a></li>
   </ul>
 </nav>
+
+<!-- URGENCY BANNER -->
+<div class="urgency-banner">
+  <div class="urgency-inner">
+    <div class="urgency-left">
+      <span class="urgency-fire">🔥</span>
+      <div>
+        <div class="urgency-title">Boards Are Coming. Are You Ready?</div>
+        <div class="urgency-sub">Every sample paper you don't check properly is marks you're leaving on the table.</div>
+      </div>
+    </div>
+    <a href="coming-soon.html" class="urgency-btn">Start Practicing Free →</a>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -1448,7 +1463,7 @@
   <div class="proof-story">
     <div class="proof-quote-mark">"</div>
     <div class="proof-content">
-      <p class="proof-text">I typed my Science answer into ChatGPT. It said <strong>"Excellent! 76 out of 80."</strong> I felt confident going into my boards. Then I scanned the same answer into GradeAI — it gave me <strong>61/80</strong> and listed exactly why: missing keyword 'diffusion', no unit for the answer, diagram not labelled. My actual board result came back. <strong>It was 62/80.</strong> GradeAI was right.</p>
+      <p class="proof-text">I typed my Science answer into ChatGPT. It said <strong>"Excellent! 76 out of 80."</strong> Then I scanned the same answer into GradeAI — it gave me <strong>61/80</strong> and listed exactly why: missing keyword 'diffusion', no unit, diagram not labelled. My board result came back. <strong>It was 62/80.</strong> GradeAI was right.</p>
       <div class="proof-author">
         <div class="proof-avatar">👧</div>
         <div>
@@ -1476,209 +1491,39 @@
   </div>
 </section>
 
-<!-- CBSE EXAMINER BANNER -->
-<section class="cbse-banner-section">
-  <div class="cbse-banner-inner">
-    <div class="cbse-seal">
-      <div class="seal-ring">
-        <span class="seal-text">CBSE</span>
-        <span class="seal-sub">Board Standard</span>
-      </div>
-    </div>
-    <div class="cbse-banner-content">
-      <div class="section-label" style="color:var(--yellow);">The Gold Standard</div>
-      <h2 class="section-title" style="color:#fff;">Marks Like a Real<br>CBSE Board Examiner</h2>
-      <p style="color:rgba(255,255,255,0.75);font-size:1.05rem;line-height:1.7;max-width:520px;">Our AI is trained on CBSE's official marking schemes and examiner guidelines. It doesn't just count points — it checks the <em>exact</em> keywords, phrasing, diagram labels, and presentation format that board examiners look for. So when you practice with GradeAI, you're practicing for the real thing.</p>
-      <div class="cbse-pills">
-        <span class="cbse-pill">✓ Official CBSE Marking Scheme</span>
-        <span class="cbse-pill">✓ Chapter-wise Standards</span>
-        <span class="cbse-pill">✓ Updated Every Year</span>
-        <span class="cbse-pill">✓ Both Class 9 & 10</span>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- FEATURES -->
 <section id="features" class="features-section">
   <div class="section-label">What You Get</div>
-  <div class="section-title">Every Feature You Need<br>to Score Higher</div>
+  <div class="section-title">Everything You Need<br>to Score Higher</div>
 
   <div class="features-grid">
     <div class="feature-card feature-card--highlight">
       <div class="feature-icon">∞</div>
       <h3>Unlimited Uploads</h3>
-      <p>Practice as much as you want — no caps, no limits, no paywalls. Upload every answer from every sample paper, all year long.</p>
+      <p>No caps, no limits. Practice every answer from every sample paper — completely free.</p>
       <div class="feature-tag">FREE FOREVER</div>
     </div>
     <div class="feature-card feature-card--highlight">
       <div class="feature-icon">🔑</div>
       <h3>Missing Keywords Flagged</h3>
-      <p>CBSE examiners reward specific terms. GradeAI highlights every important keyword your answer was missing — like "osmosis", "Newton's 3rd Law", or "photosynthesis" — so you never lose marks on vocabulary again.</p>
-      <div class="feature-tag">NEW</div>
+      <p>GradeAI highlights every CBSE keyword your answer was missing — "osmosis", "Newton's 3rd Law" — so you never lose vocab marks again.</p>
+      <div class="feature-tag">KEY FEATURE</div>
     </div>
     <div class="feature-card">
       <div class="feature-icon">📐</div>
       <h3>Presentation Coaching</h3>
-      <p>Get told exactly how to improve the layout of your answer — when to use subheadings, how to structure steps, where to draw diagrams, and how to write conclusions that impress examiners.</p>
+      <p>Know exactly when to use subheadings, how to label diagrams, and how to write conclusions that board examiners reward.</p>
     </div>
     <div class="feature-card">
       <div class="feature-icon">🗺️</div>
-      <h3>Weak Subject & Topic Map</h3>
-      <p>After each session, see a personalised breakdown of your weakest subjects, chapters, and question types — so you always know exactly where to focus your revision.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">⚡</div>
-      <h3>Instant Marking</h3>
-      <p>Results in seconds. Upload a photo of your handwritten answer and get your score, feedback, and keywords — faster than any teacher can check.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🎯</div>
-      <h3>Point-by-Point Breakdown</h3>
-      <p>See exactly which marks you earned and which you lost — every point explained clearly against the official marking scheme.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📈</div>
-      <h3>Progress Over Time</h3>
-      <p>Watch your scores improve chapter by chapter. Graphs show you how much you've grown since you started practising.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">✍️</div>
-      <h3>Handwriting Recognition</h3>
-      <p>Our AI reads real student handwriting — neat or messy. No need to type anything out. Just scan and go.</p>
-    </div>
-  </div>
-</section>
-
-<!-- WEAK SUBJECTS DASHBOARD -->
-<section class="dashboard-section">
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
-    <div>
-      <div class="section-label">Know Your Gaps</div>
-      <div class="section-title">Your Personal<br>Improvement Map</div>
-      <p style="color:#555;line-height:1.75;margin-top:1.2rem;font-size:1rem;">After every upload, GradeAI builds a picture of <strong>where you're strong and where you're losing marks</strong>. No more guessing what to revise — your dashboard tells you exactly which subjects, chapters, and question types need the most attention.</p>
-      <div class="improvement-list">
-        <div class="imp-item">
-          <span class="imp-icon" style="background:#fee2e2;color:#dc2626;">📉</span>
-          <div>
-            <div class="imp-title">Weak Areas Highlighted</div>
-            <div class="imp-desc">Chapters and topics where you consistently lose marks are surfaced automatically.</div>
-          </div>
-        </div>
-        <div class="imp-item">
-          <span class="imp-icon" style="background:#dbeafe;color:#1d4ed8;">🔑</span>
-          <div>
-            <div class="imp-title">Keywords You Keep Missing</div>
-            <div class="imp-desc">A running list of the CBSE keywords you forget most often — sorted by subject.</div>
-          </div>
-        </div>
-        <div class="imp-item">
-          <span class="imp-icon" style="background:#d1fae5;color:#065f46;">📐</span>
-          <div>
-            <div class="imp-title">Presentation Score</div>
-            <div class="imp-desc">A separate score for how well-structured and examiner-friendly your answers are.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="dashboard-card">
-      <div class="dash-header">
-        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;">📊 Your Progress Report</span>
-        <span style="font-size:0.75rem;color:#888;">Last 7 days</span>
-      </div>
-      <div class="subject-bars">
-        <div class="bar-row">
-          <span class="bar-label">Mathematics</span>
-          <div class="bar-track"><div class="bar-fill" style="width:82%;background:#3b5bdb;"></div></div>
-          <span class="bar-val">82%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">Science</span>
-          <div class="bar-track"><div class="bar-fill" style="width:65%;background:#ff4d00;"></div></div>
-          <span class="bar-val" style="color:#ff4d00;">65%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">English</span>
-          <div class="bar-track"><div class="bar-fill" style="width:78%;background:#00c9a7;"></div></div>
-          <span class="bar-val">78%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">Social Sci.</span>
-          <div class="bar-track"><div class="bar-fill" style="width:54%;background:#ff4d00;"></div></div>
-          <span class="bar-val" style="color:#ff4d00;">54%</span>
-        </div>
-        <div class="bar-row">
-          <span class="bar-label">Hindi</span>
-          <div class="bar-track"><div class="bar-fill" style="width:90%;background:#3b5bdb;"></div></div>
-          <span class="bar-val">90%</span>
-        </div>
-      </div>
-      <div class="dash-divider"></div>
-      <div class="keywords-missed">
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;margin-bottom:0.7rem;">🔑 Keywords You Missed This Week</div>
-        <div class="kw-tags">
-          <span class="kw-tag kw-red">osmosis</span>
-          <span class="kw-tag kw-red">Newton's 3rd Law</span>
-          <span class="kw-tag kw-orange">diffusion</span>
-          <span class="kw-tag kw-orange">stomata</span>
-          <span class="kw-tag kw-red">electromagnetic induction</span>
-          <span class="kw-tag kw-orange">democracy</span>
-        </div>
-      </div>
-      <div class="dash-divider"></div>
-      <div class="presentation-score">
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;margin-bottom:0.5rem;">📐 Presentation Score</div>
-        <div style="display:flex;align-items:center;gap:1rem;">
-          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:900;color:#ff4d00;">6.2<span style="font-size:1rem;color:#aaa;">/10</span></div>
-          <div style="font-size:0.75rem;color:#666;line-height:1.5;">Add subheadings · Use bullet points<br>Label all diagrams · Write a conclusion</div>
-        </div>
-      </div>
+      <h3>Weak Subject Tracker</h3>
+      <p>See your weakest subjects and chapters after every session — so you always know where to focus next.</p>
     </div>
   </div>
 </section>
 
 <!-- SUBJECTS -->
-<section id="subjects" class="subjects-section">
-  <div class="section-label">Subjects Covered</div>
-  <div class="section-title">Works Across<br>All Your Subjects</div>
-  <div class="pill-cloud">
-    <span class="subject-pill">📐 Mathematics</span>
-    <span class="subject-pill outline">🔬 Science</span>
-    <span class="subject-pill">⚡ Physics</span>
-    <span class="subject-pill outline">🧪 Chemistry</span>
-    <span class="subject-pill">🌿 Biology</span>
-    <span class="subject-pill outline">🌍 Social Science</span>
-    <span class="subject-pill">🗺️ Geography</span>
-    <span class="subject-pill outline">📖 History</span>
-    <span class="subject-pill">🏛️ Civics</span>
-    <span class="subject-pill outline">📝 English</span>
-    <span class="subject-pill">🔤 Hindi</span>
-    <span class="subject-pill outline">💻 Computer Science</span>
-  </div>
-</section>
-
 <!-- STATS -->
-<section class="stats-section">
-  <div class="stats-grid">
-    <div class="stat-item">
-      <span class="stat-num">10s</span>
-      <span class="stat-label">Average Marking Time</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">98%</span>
-      <span class="stat-label">Marking Accuracy</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">12+</span>
-      <span class="stat-label">Subjects Covered</span>
-    </div>
-    <div class="stat-item">
-      <span class="stat-num">Free</span>
-      <span class="stat-label">To Get Started</span>
-    </div>
-  </div>
-</section>
 
 <!-- TESTIMONIALS -->
 <section class="testimonials-section">
@@ -1688,34 +1533,34 @@
   <div class="testimonials-grid">
     <div class="testi-card">
       <div class="stars">★★★★★</div>
-      <p>"I was using ChatGPT to check my answers and it always said 'great job'. GradeAI told me I was missing the word 'photosynthesis' and had no diagram label. Boards result matched GradeAI exactly. Never going back."</p>
+      <p>"I used ChatGPT — it always said 'great job'. GradeAI flagged my missing keywords and the board result matched GradeAI exactly. Never going back."</p>
       <div class="testi-author">
         <div class="testi-avatar" style="background:#d1fae5;">🧑</div>
         <div>
           <div class="testi-name">Aryan Mehta</div>
-          <div class="testi-meta">Class 10, Delhi · Science: 61 → 74 out of 80</div>
+          <div class="testi-meta">Class 10, Delhi · Science: 61 → 74/80</div>
         </div>
       </div>
     </div>
     <div class="testi-card">
       <div class="stars">★★★★★</div>
-      <p>"The keyword feature is insane. It showed me a list of 6 words I kept skipping in Chemistry answers — 'catalyst', 'activation energy', 'exothermic'... I memorised them and my marks jumped 12 points."</p>
+      <p>"It showed me 6 Chemistry keywords I kept skipping — 'catalyst', 'activation energy', 'exothermic'. Memorised them. Marks jumped 13 points."</p>
       <div class="testi-author">
         <div class="testi-avatar" style="background:#e0e7ff;">👧</div>
         <div>
           <div class="testi-name">Priya Sharma</div>
-          <div class="testi-meta">Class 10, Mumbai · Chem: 58 → 71 out of 80</div>
+          <div class="testi-meta">Class 10, Mumbai · Chem: 58 → 71/80</div>
         </div>
       </div>
     </div>
     <div class="testi-card">
       <div class="stars">★★★★★</div>
-      <p>"My presentation score was 4/10 when I started. GradeAI told me to add subheadings, write steps on separate lines, and always label diagrams. Three weeks later it's 8/10. My teacher noticed — and my board result went from 63 to 74 out of 80."</p>
+      <p>"Presentation score went from 4 to 8 out of 10. Teacher noticed. Board result went from 63 to 74 out of 80."</p>
       <div class="testi-author">
         <div class="testi-avatar" style="background:#fef3c7;">🧒</div>
         <div>
           <div class="testi-name">Rohan Verma</div>
-          <div class="testi-meta">Class 9, Bangalore · Overall: +18 marks</div>
+          <div class="testi-meta">Class 9, Bangalore · Overall: +11 marks</div>
         </div>
       </div>
     </div>
@@ -1730,44 +1575,19 @@
   <div class="faq-grid">
     <div class="faq-item" onclick="this.classList.toggle('open')">
       <div class="faq-q">Can't I just use ChatGPT or Gemini for this? <span class="faq-arrow">↓</span></div>
-      <div class="faq-a">You can try — but general AI doesn't know CBSE's specific marking scheme, can't read your handwriting from a photo, and has no idea which exact keywords a board examiner awards marks for. It'll often give you a higher score than you actually deserve. GradeAI is trained exclusively on CBSE standards — it tells you what a real examiner would write, not what sounds encouraging.</div>
+      <div class="faq-a">You can try — but general AI doesn't know CBSE's marking scheme, can't read your handwriting, and often gives inflated scores. GradeAI is trained exclusively on CBSE standards and tells you exactly what a real examiner would say.</div>
     </div>
     <div class="faq-item" onclick="this.classList.toggle('open')">
       <div class="faq-q">Is it really free? No hidden charges? <span class="faq-arrow">↓</span></div>
-      <div class="faq-a">Yes — completely free with unlimited uploads during early access. We believe every student deserves access to quality feedback, regardless of budget. No credit card needed, no subscription traps.</div>
+      <div class="faq-a">Yes — completely free with unlimited uploads. No credit card, no subscription traps.</div>
     </div>
     <div class="faq-item" onclick="this.classList.toggle('open')">
       <div class="faq-q">What if my handwriting is messy? <span class="faq-arrow">↓</span></div>
-      <div class="faq-a">Our AI is trained specifically on student handwriting — including messy, hurried, and mixed English/Hindi scripts. Just take a clear, well-lit photo and it handles the rest. Most answers are read accurately in seconds.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">How accurate is the marking compared to a real examiner? <span class="faq-arrow">↓</span></div>
-      <div class="faq-a">In internal testing, GradeAI's marks matched CBSE board examiner marks within 1–2 points over 95% of the time. It uses the same official marking scheme documents that real examiners are given. It won't be perfect for every answer, but it's far more accurate than general AI or self-checking.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Which classes and boards does it support? <span class="faq-arrow">↓</span></div>
-      <div class="faq-a">Currently Class 9 and Class 10 CBSE across all major subjects. We're working on Class 11, Class 12, and state board support — sign up for early access to be notified when these launch.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">How is this different from just checking the answer key myself? <span class="faq-arrow">↓</span></div>
-      <div class="faq-a">Answer keys tell you what's right or wrong — but not <em>why</em> you lost marks, which specific keywords you missed, how your presentation compares to board standards, or what your weakest areas are across multiple attempts. GradeAI gives you all of that, automatically, every time.</div>
+      <div class="faq-a">Our AI is trained on real student handwriting — neat or messy. Just take a clear, well-lit photo and it handles the rest.</div>
     </div>
   </div>
 </section>
 
-<!-- URGENCY BANNER -->
-<div class="urgency-banner">
-  <div class="urgency-inner">
-    <div class="urgency-left">
-      <span class="urgency-fire">🔥</span>
-      <div>
-        <div class="urgency-title">Boards Are Coming. Are You Ready?</div>
-        <div class="urgency-sub">Every sample paper you don't check properly is marks you're leaving on the table.</div>
-      </div>
-    </div>
-    <a href="coming-soon.html" class="urgency-btn">Start Practicing Free →</a>
-  </div>
-</div>
 
 <!-- CTA -->
 <section id="cta" class="cta-section">
