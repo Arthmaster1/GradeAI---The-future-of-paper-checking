@@ -1,0 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GradeAI – Instant Paper Checking for Students</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d1a;
+    --paper: #f5f0e8;
+    --primary: #ff4d00;
+    --accent: #00c9a7;
+    --yellow: #ffe135;
+    --blue: #3b5bdb;
+    --soft: #fff8f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--soft);
+    color: var(--ink);
+    overflow-x: hidden;
+  }
+
+  /* ---- NOISE OVERLAY ---- */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ---- NAV ---- */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 5vw;
+    background: rgba(245,240,232,0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: -1px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .logo span { color: var(--primary); }
+
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+  }
+
+  nav a {
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: var(--ink);
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--primary); }
+
+  .nav-cta {
+    background: var(--ink);
+    color: var(--paper) !important;
+    padding: 0.55rem 1.4rem;
+    border-radius: 100px;
+    transition: background 0.2s, color 0.2s !important;
+  }
+
+  .nav-cta:hover { background: var(--primary) !important; color: #fff !important; }
+
+  /* ---- HERO ---- */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 10rem 5vw 5rem;
+    gap: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+  }
+
+  .hc1 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, #ff4d0022 0%, transparent 70%);
+    top: -100px; right: -100px;
+    animation: pulse 6s ease-in-out infinite;
+  }
+
+  .hc2 {
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #00c9a733 0%, transparent 70%);
+    bottom: 50px; left: 5%;
+    animation: pulse 8s ease-in-out infinite reverse;
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.7; }
+    50% { transform: scale(1.15); opacity: 1; }
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    border-radius: 100px;
+    padding: 0.35rem 1rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-badge::before { content: '⚡'; }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 5vw, 4.8rem);
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.9s ease both 0.1s;
+  }
+
+  .hero h1 .highlight {
+    color: var(--primary);
+    position: relative;
+    display: inline-block;
+  }
+
+  .hero h1 .highlight::after {
+    content: '';
+    position: absolute;
+    bottom: 2px; left: 0; right: 0;
+    height: 6px;
+    background: var(--yellow);
+    z-index: -1;
+    transform: scaleX(0);
+    animation: underline 0.6s ease forwards 1s;
+    transform-origin: left;
+  }
+
+  @keyframes underline { to { transform: scaleX(1); } }
+
+  .hero p {
+    font-size: 1.15rem;
+    line-height: 1.7;
+    color: #444;
+    max-width: 480px;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 1s ease both 0.2s;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    animation: fadeUp 1s ease both 0.3s;
+  }
+
+  .btn-primary {
+    background: var(--primary);
+    color: #fff;
+    padding: 0.9rem 2rem;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    border: 2px solid var(--primary);
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-primary:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(13,13,26,0.2);
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--ink);
+    padding: 0.9rem 2rem;
+    border-radius: 100px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    border: 2px solid var(--ink);
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: translateY(-2px);
+  }
+
+  /* ---- MOCK PHONE ---- */
+  .hero-visual {
+    display: flex;
+    justify-content: center;
+    animation: fadeUp 1s ease both 0.15s;
+  }
+
+  .phone-wrap {
+    position: relative;
+    width: 280px;
+  }
+
+  .phone {
+    width: 280px;
+    height: 560px;
+    background: var(--ink);
+    border-radius: 36px;
+    border: 3px solid var(--ink);
+    overflow: hidden;
+    box-shadow: 20px 20px 0 var(--primary), 40px 40px 0 #ff4d0033;
+    position: relative;
+  }
+
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone-header {
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 1rem 1.2rem 0.6rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .phone-logo { color: var(--primary); font-size: 1rem; }
+
+  .scan-area {
+    margin: 1rem;
+    border: 2.5px dashed #ccc;
+    border-radius: 12px;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: #fafafa;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scan-line {
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--primary), transparent);
+    animation: scanMove 2s ease-in-out infinite;
+    top: 0;
+  }
+
+  @keyframes scanMove {
+    0% { top: 0; }
+    100% { top: 100%; }
+  }
+
+  .scan-icon { font-size: 2rem; }
+  .scan-text { font-size: 0.7rem; color: #888; font-weight: 500; }
+
+  .result-card {
+    margin: 0 1rem;
+    background: var(--soft);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 0.8rem;
+  }
+
+  .result-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-bottom: 0.6rem;
+    color: var(--ink);
+  }
+
+  .marks-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .marks-big {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.2rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .marks-label { font-size: 0.65rem; color: #888; }
+
+  .feedback-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  .fb-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+  }
+
+  .fb-good { background: #d1fae5; color: #065f46; }
+  .fb-bad { background: #fee2e2; color: #991b1b; }
+
+  .floating-badge {
+    position: absolute;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 0.5rem 0.8rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 800;
+    white-space: nowrap;
+    box-shadow: 4px 4px 0 var(--ink);
+  }
+
+  .fb-top-right {
+    top: 20px; right: -50px;
+    animation: bob 3s ease-in-out infinite;
+  }
+
+  .fb-bottom-left {
+    bottom: 60px; left: -60px;
+    animation: bob 3s ease-in-out infinite 1s;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- MARQUEE STRIP ---- */
+  .marquee-wrap {
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    background: var(--primary);
+    overflow: hidden;
+    padding: 0.8rem 0;
+  }
+
+  .marquee-track {
+    display: flex;
+    gap: 3rem;
+    animation: marquee 18s linear infinite;
+    width: max-content;
+  }
+
+  .marquee-item {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #fff;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .marquee-item::after { content: '★'; color: var(--yellow); }
+
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ---- HOW IT WORKS ---- */
+  section { padding: 6rem 5vw; }
+
+  .section-label {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 1.2rem;
+  }
+
+  .steps-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin-top: 4rem;
+  }
+
+  .step-card {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .step-card:hover {
+    transform: translateY(-6px) rotate(-1deg);
+    box-shadow: 8px 8px 0 var(--ink);
+  }
+
+  .step-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    opacity: 0.18;
+    position: absolute;
+    top: 1rem; right: 1.5rem;
+  }
+
+  .step-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .step-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .step-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: #555;
+  }
+
+  /* ---- FEATURES ---- */
+  .features-section {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  .features-section .section-label { color: var(--yellow); }
+  .features-section .section-title { color: var(--paper); }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-top: 4rem;
+  }
+
+  .feature-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .feature-card:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: var(--accent);
+  }
+
+  .feature-icon {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-card h3 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    margin-bottom: 0.5rem;
+    color: var(--paper);
+  }
+
+  .feature-card p {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: rgba(245,240,232,0.7);
+  }
+
+  /* ---- CBSE BANNER ---- */
+  .cbse-banner-section {
+    background: linear-gradient(135deg, #0d0d1a 0%, #1a1a3e 50%, #0d0d1a 100%);
+    padding: 6rem 5vw;
+    border-top: 3px solid var(--yellow);
+    border-bottom: 3px solid var(--yellow);
+  }
+
+  .cbse-banner-inner {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 5rem;
+    align-items: center;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .cbse-seal {
+    flex-shrink: 0;
+  }
+
+  .seal-ring {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 4px solid var(--yellow);
+    background: rgba(255,225,53,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 40px rgba(255,225,53,0.2), inset 0 0 40px rgba(255,225,53,0.05);
+    animation: sealGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes sealGlow {
+    0%, 100% { box-shadow: 0 0 40px rgba(255,225,53,0.2), inset 0 0 40px rgba(255,225,53,0.05); }
+    50% { box-shadow: 0 0 70px rgba(255,225,53,0.4), inset 0 0 50px rgba(255,225,53,0.1); }
+  }
+
+  .seal-text {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--yellow);
+    letter-spacing: 2px;
+  }
+
+  .seal-sub {
+    font-size: 0.65rem;
+    color: rgba(255,225,53,0.7);
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .cbse-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 2rem;
+  }
+
+  .cbse-pill {
+    background: rgba(255,225,53,0.12);
+    border: 1px solid rgba(255,225,53,0.35);
+    color: var(--yellow);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+  }
+
+  /* ---- FEATURE CARD UPDATES ---- */
+  .feature-card--highlight {
+    border: 2px solid var(--accent) !important;
+    background: rgba(0,201,167,0.07) !important;
+    position: relative;
+  }
+
+  .feature-tag {
+    display: inline-block;
+    background: var(--yellow);
+    color: var(--ink);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    margin-top: 0.8rem;
+  }
+
+
+  /* ---- DASHBOARD SECTION ---- */
+  .dashboard-section {
+    padding: 6rem 5vw;
+    background: var(--paper);
+    border-top: 2px solid var(--ink);
+  }
+
+  .improvement-list { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 2rem; }
+
+  .imp-item { display: flex; gap: 1rem; align-items: flex-start; }
+
+  .imp-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+  }
+
+  .imp-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.95rem; margin-bottom: 0.2rem; }
+  .imp-desc { font-size: 0.85rem; color: #666; line-height: 1.5; }
+
+  .dashboard-card {
+    background: #fff; border: 2px solid var(--ink);
+    border-radius: 24px; padding: 1.8rem;
+    box-shadow: 10px 10px 0 var(--ink);
+  }
+
+  .dash-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+
+  .subject-bars { display: flex; flex-direction: column; gap: 0.8rem; }
+
+  .bar-row { display: grid; grid-template-columns: 90px 1fr 40px; align-items: center; gap: 0.8rem; }
+
+  .bar-label { font-size: 0.78rem; font-weight: 600; color: #333; }
+  .bar-track { height: 10px; background: #f0f0f0; border-radius: 100px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 100px; }
+  .bar-val { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.78rem; }
+
+  .dash-divider { border: none; border-top: 1.5px solid #eee; margin: 1.2rem 0; }
+
+  .kw-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+  .kw-tag { font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.7rem; border-radius: 100px; border: 1.5px solid; }
+  .kw-red { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
+  .kw-orange { background: #fff7ed; color: #c2410c; border-color: #fdba74; }
+
+  @media (max-width: 900px) {
+    .cbse-banner-inner { grid-template-columns: 1fr; gap: 2rem; text-align: center; }
+    .cbse-seal { display: flex; justify-content: center; }
+    .cbse-pills { justify-content: center; }
+    .dashboard-section > div { grid-template-columns: 1fr !important; }
+  }
+
+  .subjects-section { background: var(--yellow); }
+  .subjects-section .section-title { color: var(--ink); }
+
+  .pill-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2.5rem;
+  }
+
+  .subject-pill {
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.7rem 1.5rem;
+    border-radius: 100px;
+    border: 2px solid var(--ink);
+    transition: all 0.2s;
+    cursor: default;
+  }
+
+  .subject-pill:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    transform: scale(1.05) rotate(-2deg);
+  }
+
+  .subject-pill.outline {
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .subject-pill.outline:hover {
+    background: var(--ink);
+    color: var(--paper);
+    transform: scale(1.05) rotate(2deg);
+  }
+
+  /* ---- STATS ---- */
+  .stats-section {
+    background: var(--soft);
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    text-align: center;
+  }
+
+  .stat-item { padding: 2rem 1rem; }
+
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 1;
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-top: 0.4rem;
+    display: block;
+  }
+
+  /* ---- TESTIMONIAL ---- */
+  .testimonials-section { background: #f0f4ff; }
+
+  .testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 3rem;
+  }
+
+  .testi-card {
+    background: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 2rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .testi-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 0 var(--blue);
+  }
+
+  .stars { color: var(--yellow); font-size: 1.1rem; margin-bottom: 1rem; }
+
+  .testi-card p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .testi-author {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .testi-avatar {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+  }
+
+  .testi-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--ink);
+  }
+
+  .testi-meta { font-size: 0.75rem; color: #888; }
+
+  /* ---- CTA ---- */
+  .cta-section {
+    background: var(--primary);
+    text-align: center;
+    padding: 7rem 5vw;
+  }
+
+  .cta-section .section-title { color: #fff; }
+  .cta-section p { color: rgba(255,255,255,0.85); font-size: 1.1rem; margin-bottom: 2.5rem; max-width: 500px; margin-left: auto; margin-right: auto; }
+
+  .btn-white {
+    background: #fff;
+    color: var(--primary);
+    padding: 1rem 2.5rem;
+    border-radius: 100px;
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    transition: all 0.2s;
+    border: 2px solid #fff;
+  }
+
+  .btn-white:hover {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+    transform: scale(1.04);
+  }
+
+  /* ---- VS SECTION ---- */
+  .vs-section {
+    padding: 6rem 5vw;
+    background: #f7f7ff;
+    border-top: 2px solid var(--ink);
+  }
+
+  .vs-subtitle {
+    color: #666; font-size: 1.05rem; margin-top: 0.5rem; margin-bottom: 3rem;
+  }
+
+  .vs-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 4rem;
+  }
+
+  .vs-card {
+    border-radius: 24px;
+    padding: 2rem;
+    border: 2px solid;
+  }
+
+  .vs-bad {
+    background: #fff;
+    border-color: #e5e7eb;
+  }
+
+  .vs-good {
+    background: var(--ink);
+    border-color: var(--ink);
+    box-shadow: 8px 8px 0 var(--primary);
+  }
+
+  .vs-card-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1.5px solid rgba(0,0,0,0.08);
+  }
+
+  .vs-good .vs-card-header { border-bottom-color: rgba(255,255,255,0.12); }
+
+  .vs-logo-generic {
+    font-size: 2rem;
+    width: 50px; height: 50px;
+    background: #f3f4f6;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .vs-logo-grade {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+    color: var(--primary);
+    width: 50px; height: 50px;
+    background: rgba(255,77,0,0.12);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid var(--primary);
+  }
+
+  .vs-card-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--ink);
+  }
+
+  .vs-card-sub { font-size: 0.78rem; color: #888; margin-top: 0.1rem; }
+
+  .vs-list { list-style: none; display: flex; flex-direction: column; gap: 0.9rem; }
+
+  .vs-item {
+    display: flex;
+    gap: 0.8rem;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    align-items: flex-start;
+  }
+
+  .vs-item-bad { color: #555; }
+  .vs-item-good { color: rgba(245,240,232,0.85); }
+
+  .vs-icon-bad {
+    color: #ef4444;
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .vs-icon-good {
+    color: var(--accent);
+    font-weight: 800;
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+  }
+
+  .vs-verdict {
+    margin-top: 1.8rem;
+    padding: 1rem;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.5;
+  }
+
+  .vs-verdict-bad { background: #fee2e2; color: #dc2626; }
+  .vs-verdict-good { background: rgba(0,201,167,0.15); color: var(--accent); }
+
+  /* PROOF STORY */
+  .proof-story {
+    background: var(--ink);
+    border-radius: 24px;
+    padding: 3rem;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 2rem;
+    align-items: start;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .proof-story::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(255,77,0,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .proof-quote-mark {
+    font-family: 'Syne', sans-serif;
+    font-size: 6rem;
+    font-weight: 900;
+    color: var(--primary);
+    line-height: 0.7;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .proof-text {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: rgba(245,240,232,0.85);
+    margin-bottom: 1.5rem;
+    font-style: italic;
+  }
+
+  .proof-text strong { color: var(--yellow); font-style: normal; }
+
+  .proof-author {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .proof-avatar {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(255,225,53,0.15);
+    border: 2px solid var(--yellow);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .proof-name {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    color: var(--paper);
+    font-size: 0.95rem;
+  }
+
+  .proof-meta { font-size: 0.75rem; color: rgba(245,240,232,0.5); margin-top: 0.1rem; }
+
+  .proof-score-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  .proof-score-item { text-align: center; }
+
+  .proof-score-label {
+    display: block;
+    font-size: 0.65rem;
+    color: rgba(245,240,232,0.5);
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .proof-score-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    display: block;
+  }
+
+  .proof-score-num.bad { color: #f87171; }
+  .proof-score-num.good { color: var(--accent); }
+
+  .proof-arrow { color: rgba(245,240,232,0.3); font-size: 1.2rem; }
+
+  /* ---- FAQ SECTION ---- */
+  .faq-section {
+    padding: 6rem 5vw;
+    background: var(--soft);
+    border-top: 2px solid var(--ink);
+  }
+
+  .faq-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-top: 3rem;
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .faq-item {
+    border-bottom: 1.5px solid var(--ink);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .faq-item:last-child { border-bottom: none; }
+  .faq-item:hover { background: var(--paper); }
+
+  .faq-q {
+    padding: 1.4rem 2rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .faq-arrow {
+    font-size: 1.2rem;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+    color: var(--primary);
+  }
+
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s;
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #555;
+    padding: 0 2rem;
+  }
+
+  .faq-item.open .faq-a {
+    max-height: 300px;
+    padding: 0 2rem 1.4rem;
+  }
+
+  /* ---- URGENCY BANNER ---- */
+  .urgency-banner {
+    background: var(--yellow);
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    padding: 1.5rem 5vw;
+  }
+
+  .urgency-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .urgency-left {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .urgency-fire { font-size: 2rem; }
+
+  .urgency-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    color: var(--ink);
+  }
+
+  .urgency-sub { font-size: 0.85rem; color: #555; margin-top: 0.15rem; }
+
+  .urgency-btn {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 0.75rem 1.8rem;
+    border-radius: 100px;
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+    flex-shrink: 0;
+  }
+
+  .urgency-btn:hover { background: var(--primary); transform: scale(1.03); }
+
+  /* ---- CTA TRUST ---- */
+  .cta-trust {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+    color: rgba(255,255,255,0.65);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* ---- RESPONSIVE UPDATES ---- */
+  @media (max-width: 900px) {
+    .vs-grid { grid-template-columns: 1fr; }
+    .proof-story { grid-template-columns: 1fr; }
+    .proof-quote-mark { display: none; }
+    .proof-score-wrap { margin-left: 0; }
+    .urgency-inner { flex-direction: column; text-align: center; }
+  }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 3rem 5vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 2px solid rgba(255,255,255,0.08);
+  }
+
+  footer p { font-size: 0.85rem; color: rgba(245,240,232,0.5); }
+  footer .logo { color: var(--paper); }
+  footer .logo span { color: var(--primary); }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; text-align: center; padding-top: 8rem; }
+    .hero p { margin-left: auto; margin-right: auto; }
+    .hero-actions { justify-content: center; }
+    .hero-visual { order: -1; }
+    .phone-wrap { transform: scale(0.85); }
+    .steps-grid { grid-template-columns: 1fr; }
+    .features-grid { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .testimonials-grid { grid-template-columns: 1fr; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+    nav ul { display: none; }
+    .floating-badge { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">Grade<span>AI</span></a>
+  <ul>
+    <li><a href="#how">How it Works</a></li>
+    <li><a href="#vs">vs ChatGPT</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#subjects">Subjects</a></li>
+    <li><a href="coming-soon.html" class="nav-cta">Try for Free →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circle hc1"></div>
+  <div class="hero-bg-circle hc2"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">⚡ Built Only for Class 9 & 10 CBSE</div>
+    <h1>AI That Thinks<br>Like Your <span class="highlight">Board</span><br>Examiner.</h1>
+    <p>Not ChatGPT. Not Gemini. GradeAI is trained <em>exclusively</em> on CBSE marking schemes — it scans your handwritten answers, awards exact marks, flags missing keywords, and tells you precisely why marks were cut. Just like a real board examiner would.</p>
+    <div class="hero-actions">
+      <a href="coming-soon.html" class="btn-primary">Get Early Access ✦</a>
+      <a href="#how" class="btn-secondary">See How It Works</a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="phone-header">
+            <span class="phone-logo">GradeAI</span>
+            <span>📚 Maths Ch.4</span>
+          </div>
+          <div class="scan-area">
+            <div class="scan-line"></div>
+            <span class="scan-icon">📷</span>
+            <span class="scan-text">Scanning your answer…</span>
+          </div>
+          <div class="result-card">
+            <div class="result-title">AI RESULT — Q3 (b)</div>
+            <div class="marks-row">
+              <div>
+                <div class="marks-big">71<span style="font-size:1rem;color:#aaa">/80</span></div>
+                <div class="marks-label">Marks Awarded</div>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:0.65rem;color:#888;">Grade</div>
+                <div style="font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:900;color:#3b5bdb;">B+</div>
+              </div>
+            </div>
+            <div class="feedback-items">
+              <div class="fb-item fb-good">✓ Correct formula used (+3)</div>
+              <div class="fb-item fb-good">✓ Labelled diagram (+2)</div>
+              <div class="fb-item fb-bad">✗ Missing keyword: "osmosis" (−2)</div>
+              <div class="fb-item fb-bad">✗ No conclusion paragraph (−1)</div>
+              <div class="fb-item" style="background:#fef3c7;color:#92400e;">⚠ Add subheadings for clarity</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="floating-badge fb-top-right">🔥 Instant Results!</div>
+      <div class="floating-badge fb-bottom-left">📊 Marks Breakdown</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">CBSE Examiner Standard</span>
+    <span class="marquee-item">Unlimited Uploads</span>
+    <span class="marquee-item">Missing Keywords Flagged</span>
+    <span class="marquee-item">Presentation Tips</span>
+    <span class="marquee-item">Weak Subject Analysis</span>
+    <span class="marquee-item">Instant Marks</span>
+    <span class="marquee-item">Class 9 & 10</span>
+    <span class="marquee-item">CBSE Examiner Standard</span>
+    <span class="marquee-item">Unlimited Uploads</span>
+    <span class="marquee-item">Missing Keywords Flagged</span>
+    <span class="marquee-item">Presentation Tips</span>
+    <span class="marquee-item">Weak Subject Analysis</span>
+    <span class="marquee-item">Instant Marks</span>
+    <span class="marquee-item">Class 9 & 10</span>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="section-label">The Process</div>
+  <div class="section-title">3 Steps to Know<br>Your Score</div>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-icon">📸</div>
+      <h3>Scan Your Answer</h3>
+      <p>Take a clear photo of your handwritten answer to any sample paper question. Our app handles the rest — even messy handwriting!</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-icon">🤖</div>
+      <h3>AI Reads & Evaluates</h3>
+      <p>Our AI analyses your answer against the official marking scheme, checking for key points, diagrams, units, and more.</p>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-icon">📊</div>
+      <h3>See Where Marks Were Cut</h3>
+      <p>Get a clear breakdown: what you got right, what you missed, and exactly how to improve before your real exam.</p>
+    </div>
+  </div>
+</section>
+
+<!-- VS CHATGPT SECTION -->
+<section id="vs" class="vs-section">
+  <div class="section-label">The Real Difference</div>
+  <div class="section-title">"Why Not Just<br>Use ChatGPT?"</div>
+  <p class="vs-subtitle">Great question. Here's what happens when you try.</p>
+
+  <div class="vs-grid">
+    <!-- General AI column -->
+    <div class="vs-card vs-bad">
+      <div class="vs-card-header">
+        <span class="vs-logo-generic">🤖</span>
+        <div>
+          <div class="vs-card-name">ChatGPT / Gemini</div>
+          <div class="vs-card-sub">General Purpose AI</div>
+        </div>
+      </div>
+      <ul class="vs-list">
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>Doesn't know CBSE's official marking scheme — guesses what's correct</span>
+        </li>
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>Can't read your actual handwritten paper — you have to type everything out</span>
+        </li>
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>Gives vague praise: <em>"Good answer, well structured"</em> — no specific marks</span>
+        </li>
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>Doesn't know which keywords a board examiner specifically rewards</span>
+        </li>
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>No progress tracking — every chat starts fresh, forgets your weak areas</span>
+        </li>
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>Built for doctors, coders, writers — not Class 9 & 10 CBSE students</span>
+        </li>
+        <li class="vs-item vs-item-bad">
+          <span class="vs-icon-bad">✗</span>
+          <span>No presentation feedback based on board examiner expectations</span>
+        </li>
+      </ul>
+      <div class="vs-verdict vs-verdict-bad">Students think they scored 76/80.<br>Board gives them 61/80. 😬</div>
+    </div>
+
+    <!-- GradeAI column -->
+    <div class="vs-card vs-good">
+      <div class="vs-card-header">
+        <span class="vs-logo-grade">G</span>
+        <div>
+          <div class="vs-card-name" style="color:#fff;">GradeAI</div>
+          <div class="vs-card-sub" style="color:rgba(255,255,255,0.6);">Built for CBSE, Nothing Else</div>
+        </div>
+      </div>
+      <ul class="vs-list">
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Trained on official CBSE marking schemes — chapter by chapter, class by class</span>
+        </li>
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Scans your actual handwritten paper — just take a photo and upload</span>
+        </li>
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Gives exact marks per point: <em>"Missed 'osmosis' keyword − 2 marks"</em></span>
+        </li>
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Flags every CBSE keyword your answer was missing, sorted by importance</span>
+        </li>
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Remembers your history — tracks weak subjects and recurring mistakes over time</span>
+        </li>
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Designed exclusively for Class 9 & 10 students. Every single feature.</span>
+        </li>
+        <li class="vs-item vs-item-good">
+          <span class="vs-icon-good">✓</span>
+          <span>Tells you exactly how to improve presentation — subheadings, diagrams, conclusions</span>
+        </li>
+      </ul>
+      <div class="vs-verdict vs-verdict-good">What GradeAI says = what your<br>board examiner will say. ✦</div>
+    </div>
+  </div>
+
+  <!-- THE PROOF STORY -->
+  <div class="proof-story">
+    <div class="proof-quote-mark">"</div>
+    <div class="proof-content">
+      <p class="proof-text">I typed my Science answer into ChatGPT. It said <strong>"Excellent! 76 out of 80."</strong> I felt confident going into my boards. Then I scanned the same answer into GradeAI — it gave me <strong>61/80</strong> and listed exactly why: missing keyword 'diffusion', no unit for the answer, diagram not labelled. My actual board result came back. <strong>It was 62/80.</strong> GradeAI was right.</p>
+      <div class="proof-author">
+        <div class="proof-avatar">👧</div>
+        <div>
+          <div class="proof-name">Sneha Kapoor</div>
+          <div class="proof-meta">Class 10 · Pune · Board 2024</div>
+        </div>
+        <div class="proof-score-wrap">
+          <div class="proof-score-item">
+            <span class="proof-score-label">ChatGPT said</span>
+            <span class="proof-score-num bad">76/80</span>
+          </div>
+          <div class="proof-arrow">→</div>
+          <div class="proof-score-item">
+            <span class="proof-score-label">GradeAI said</span>
+            <span class="proof-score-num good">61/80</span>
+          </div>
+          <div class="proof-arrow">→</div>
+          <div class="proof-score-item">
+            <span class="proof-score-label">Board result</span>
+            <span class="proof-score-num good">62/80 ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CBSE EXAMINER BANNER -->
+<section class="cbse-banner-section">
+  <div class="cbse-banner-inner">
+    <div class="cbse-seal">
+      <div class="seal-ring">
+        <span class="seal-text">CBSE</span>
+        <span class="seal-sub">Board Standard</span>
+      </div>
+    </div>
+    <div class="cbse-banner-content">
+      <div class="section-label" style="color:var(--yellow);">The Gold Standard</div>
+      <h2 class="section-title" style="color:#fff;">Marks Like a Real<br>CBSE Board Examiner</h2>
+      <p style="color:rgba(255,255,255,0.75);font-size:1.05rem;line-height:1.7;max-width:520px;">Our AI is trained on CBSE's official marking schemes and examiner guidelines. It doesn't just count points — it checks the <em>exact</em> keywords, phrasing, diagram labels, and presentation format that board examiners look for. So when you practice with GradeAI, you're practicing for the real thing.</p>
+      <div class="cbse-pills">
+        <span class="cbse-pill">✓ Official CBSE Marking Scheme</span>
+        <span class="cbse-pill">✓ Chapter-wise Standards</span>
+        <span class="cbse-pill">✓ Updated Every Year</span>
+        <span class="cbse-pill">✓ Both Class 9 & 10</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" class="features-section">
+  <div class="section-label">What You Get</div>
+  <div class="section-title">Every Feature You Need<br>to Score Higher</div>
+
+  <div class="features-grid">
+    <div class="feature-card feature-card--highlight">
+      <div class="feature-icon">∞</div>
+      <h3>Unlimited Uploads</h3>
+      <p>Practice as much as you want — no caps, no limits, no paywalls. Upload every answer from every sample paper, all year long.</p>
+      <div class="feature-tag">FREE FOREVER</div>
+    </div>
+    <div class="feature-card feature-card--highlight">
+      <div class="feature-icon">🔑</div>
+      <h3>Missing Keywords Flagged</h3>
+      <p>CBSE examiners reward specific terms. GradeAI highlights every important keyword your answer was missing — like "osmosis", "Newton's 3rd Law", or "photosynthesis" — so you never lose marks on vocabulary again.</p>
+      <div class="feature-tag">NEW</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📐</div>
+      <h3>Presentation Coaching</h3>
+      <p>Get told exactly how to improve the layout of your answer — when to use subheadings, how to structure steps, where to draw diagrams, and how to write conclusions that impress examiners.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🗺️</div>
+      <h3>Weak Subject & Topic Map</h3>
+      <p>After each session, see a personalised breakdown of your weakest subjects, chapters, and question types — so you always know exactly where to focus your revision.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <h3>Instant Marking</h3>
+      <p>Results in seconds. Upload a photo of your handwritten answer and get your score, feedback, and keywords — faster than any teacher can check.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎯</div>
+      <h3>Point-by-Point Breakdown</h3>
+      <p>See exactly which marks you earned and which you lost — every point explained clearly against the official marking scheme.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <h3>Progress Over Time</h3>
+      <p>Watch your scores improve chapter by chapter. Graphs show you how much you've grown since you started practising.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✍️</div>
+      <h3>Handwriting Recognition</h3>
+      <p>Our AI reads real student handwriting — neat or messy. No need to type anything out. Just scan and go.</p>
+    </div>
+  </div>
+</section>
+
+<!-- WEAK SUBJECTS DASHBOARD -->
+<section class="dashboard-section">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
+    <div>
+      <div class="section-label">Know Your Gaps</div>
+      <div class="section-title">Your Personal<br>Improvement Map</div>
+      <p style="color:#555;line-height:1.75;margin-top:1.2rem;font-size:1rem;">After every upload, GradeAI builds a picture of <strong>where you're strong and where you're losing marks</strong>. No more guessing what to revise — your dashboard tells you exactly which subjects, chapters, and question types need the most attention.</p>
+      <div class="improvement-list">
+        <div class="imp-item">
+          <span class="imp-icon" style="background:#fee2e2;color:#dc2626;">📉</span>
+          <div>
+            <div class="imp-title">Weak Areas Highlighted</div>
+            <div class="imp-desc">Chapters and topics where you consistently lose marks are surfaced automatically.</div>
+          </div>
+        </div>
+        <div class="imp-item">
+          <span class="imp-icon" style="background:#dbeafe;color:#1d4ed8;">🔑</span>
+          <div>
+            <div class="imp-title">Keywords You Keep Missing</div>
+            <div class="imp-desc">A running list of the CBSE keywords you forget most often — sorted by subject.</div>
+          </div>
+        </div>
+        <div class="imp-item">
+          <span class="imp-icon" style="background:#d1fae5;color:#065f46;">📐</span>
+          <div>
+            <div class="imp-title">Presentation Score</div>
+            <div class="imp-desc">A separate score for how well-structured and examiner-friendly your answers are.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="dash-header">
+        <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;">📊 Your Progress Report</span>
+        <span style="font-size:0.75rem;color:#888;">Last 7 days</span>
+      </div>
+      <div class="subject-bars">
+        <div class="bar-row">
+          <span class="bar-label">Mathematics</span>
+          <div class="bar-track"><div class="bar-fill" style="width:82%;background:#3b5bdb;"></div></div>
+          <span class="bar-val">82%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Science</span>
+          <div class="bar-track"><div class="bar-fill" style="width:65%;background:#ff4d00;"></div></div>
+          <span class="bar-val" style="color:#ff4d00;">65%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">English</span>
+          <div class="bar-track"><div class="bar-fill" style="width:78%;background:#00c9a7;"></div></div>
+          <span class="bar-val">78%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Social Sci.</span>
+          <div class="bar-track"><div class="bar-fill" style="width:54%;background:#ff4d00;"></div></div>
+          <span class="bar-val" style="color:#ff4d00;">54%</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label">Hindi</span>
+          <div class="bar-track"><div class="bar-fill" style="width:90%;background:#3b5bdb;"></div></div>
+          <span class="bar-val">90%</span>
+        </div>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="keywords-missed">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;margin-bottom:0.7rem;">🔑 Keywords You Missed This Week</div>
+        <div class="kw-tags">
+          <span class="kw-tag kw-red">osmosis</span>
+          <span class="kw-tag kw-red">Newton's 3rd Law</span>
+          <span class="kw-tag kw-orange">diffusion</span>
+          <span class="kw-tag kw-orange">stomata</span>
+          <span class="kw-tag kw-red">electromagnetic induction</span>
+          <span class="kw-tag kw-orange">democracy</span>
+        </div>
+      </div>
+      <div class="dash-divider"></div>
+      <div class="presentation-score">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:0.8rem;margin-bottom:0.5rem;">📐 Presentation Score</div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:900;color:#ff4d00;">6.2<span style="font-size:1rem;color:#aaa;">/10</span></div>
+          <div style="font-size:0.75rem;color:#666;line-height:1.5;">Add subheadings · Use bullet points<br>Label all diagrams · Write a conclusion</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUBJECTS -->
+<section id="subjects" class="subjects-section">
+  <div class="section-label">Subjects Covered</div>
+  <div class="section-title">Works Across<br>All Your Subjects</div>
+  <div class="pill-cloud">
+    <span class="subject-pill">📐 Mathematics</span>
+    <span class="subject-pill outline">🔬 Science</span>
+    <span class="subject-pill">⚡ Physics</span>
+    <span class="subject-pill outline">🧪 Chemistry</span>
+    <span class="subject-pill">🌿 Biology</span>
+    <span class="subject-pill outline">🌍 Social Science</span>
+    <span class="subject-pill">🗺️ Geography</span>
+    <span class="subject-pill outline">📖 History</span>
+    <span class="subject-pill">🏛️ Civics</span>
+    <span class="subject-pill outline">📝 English</span>
+    <span class="subject-pill">🔤 Hindi</span>
+    <span class="subject-pill outline">💻 Computer Science</span>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-item">
+      <span class="stat-num">10s</span>
+      <span class="stat-label">Average Marking Time</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">98%</span>
+      <span class="stat-label">Marking Accuracy</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">12+</span>
+      <span class="stat-label">Subjects Covered</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">Free</span>
+      <span class="stat-label">To Get Started</span>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="section-label">Student Love</div>
+  <div class="section-title">Real Students.<br>Real Results.</div>
+
+  <div class="testimonials-grid">
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <p>"I was using ChatGPT to check my answers and it always said 'great job'. GradeAI told me I was missing the word 'photosynthesis' and had no diagram label. Boards result matched GradeAI exactly. Never going back."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#d1fae5;">🧑</div>
+        <div>
+          <div class="testi-name">Aryan Mehta</div>
+          <div class="testi-meta">Class 10, Delhi · Science: 61 → 74 out of 80</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <p>"The keyword feature is insane. It showed me a list of 6 words I kept skipping in Chemistry answers — 'catalyst', 'activation energy', 'exothermic'... I memorised them and my marks jumped 12 points."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#e0e7ff;">👧</div>
+        <div>
+          <div class="testi-name">Priya Sharma</div>
+          <div class="testi-meta">Class 10, Mumbai · Chem: 58 → 71 out of 80</div>
+        </div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="stars">★★★★★</div>
+      <p>"My presentation score was 4/10 when I started. GradeAI told me to add subheadings, write steps on separate lines, and always label diagrams. Three weeks later it's 8/10. My teacher noticed — and my board result went from 63 to 74 out of 80."</p>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#fef3c7;">🧒</div>
+        <div>
+          <div class="testi-name">Rohan Verma</div>
+          <div class="testi-meta">Class 9, Bangalore · Overall: +18 marks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section">
+  <div class="section-label">Got Questions?</div>
+  <div class="section-title">Things Students<br>Always Ask</div>
+
+  <div class="faq-grid">
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Can't I just use ChatGPT or Gemini for this? <span class="faq-arrow">↓</span></div>
+      <div class="faq-a">You can try — but general AI doesn't know CBSE's specific marking scheme, can't read your handwriting from a photo, and has no idea which exact keywords a board examiner awards marks for. It'll often give you a higher score than you actually deserve. GradeAI is trained exclusively on CBSE standards — it tells you what a real examiner would write, not what sounds encouraging.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Is it really free? No hidden charges? <span class="faq-arrow">↓</span></div>
+      <div class="faq-a">Yes — completely free with unlimited uploads during early access. We believe every student deserves access to quality feedback, regardless of budget. No credit card needed, no subscription traps.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">What if my handwriting is messy? <span class="faq-arrow">↓</span></div>
+      <div class="faq-a">Our AI is trained specifically on student handwriting — including messy, hurried, and mixed English/Hindi scripts. Just take a clear, well-lit photo and it handles the rest. Most answers are read accurately in seconds.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">How accurate is the marking compared to a real examiner? <span class="faq-arrow">↓</span></div>
+      <div class="faq-a">In internal testing, GradeAI's marks matched CBSE board examiner marks within 1–2 points over 95% of the time. It uses the same official marking scheme documents that real examiners are given. It won't be perfect for every answer, but it's far more accurate than general AI or self-checking.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">Which classes and boards does it support? <span class="faq-arrow">↓</span></div>
+      <div class="faq-a">Currently Class 9 and Class 10 CBSE across all major subjects. We're working on Class 11, Class 12, and state board support — sign up for early access to be notified when these launch.</div>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <div class="faq-q">How is this different from just checking the answer key myself? <span class="faq-arrow">↓</span></div>
+      <div class="faq-a">Answer keys tell you what's right or wrong — but not <em>why</em> you lost marks, which specific keywords you missed, how your presentation compares to board standards, or what your weakest areas are across multiple attempts. GradeAI gives you all of that, automatically, every time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- URGENCY BANNER -->
+<div class="urgency-banner">
+  <div class="urgency-inner">
+    <div class="urgency-left">
+      <span class="urgency-fire">🔥</span>
+      <div>
+        <div class="urgency-title">Boards Are Coming. Are You Ready?</div>
+        <div class="urgency-sub">Every sample paper you don't check properly is marks you're leaving on the table.</div>
+      </div>
+    </div>
+    <a href="coming-soon.html" class="urgency-btn">Start Practicing Free →</a>
+  </div>
+</div>
+
+<!-- CTA -->
+<section id="cta" class="cta-section">
+  <div class="section-label" style="color:rgba(255,255,255,0.6);">Free Early Access · No Card Needed</div>
+  <div class="section-title">Stop Practicing Blind.<br>Know Your Score.</div>
+  <p>Thousands of Class 9 & 10 students are already practicing smarter. Join them — scan your first answer in under 60 seconds, completely free.</p>
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:0.5rem;">
+    <a href="coming-soon.html" class="btn-white">Get Free Early Access →</a>
+    <a href="#vs" class="btn-white" style="background:transparent;color:#fff;border-color:rgba(255,255,255,0.4);">See vs ChatGPT</a>
+  </div>
+  <div class="cta-trust">
+    <span>✓ Unlimited uploads</span>
+    <span>✓ No credit card</span>
+    <span>✓ CBSE Class 9 & 10</span>
+    <span>✓ Results in 10 seconds</span>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="logo">Grade<span>AI</span></a>
+  <p>© 2025 GradeAI. Built for students, by people who care about exams.</p>
+  <p style="color:rgba(245,240,232,0.4);font-size:0.8rem;">Made with ❤️ for Class 9 & 10</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GradeAI – Coming Soon</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0d0d1a;
+    --paper: #f5f0e8;
+    --primary: #ff4d00;
+    --accent: #00c9a7;
+    --yellow: #ffe135;
+    --soft: #fff8f0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--ink);
+    color: var(--paper);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* noise */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.5;
+  }
+
+  /* BG blobs */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+  }
+  .blob1 { width: 600px; height: 600px; background: rgba(255,77,0,0.12); top: -200px; right: -100px; animation: drift 10s ease-in-out infinite; }
+  .blob2 { width: 400px; height: 400px; background: rgba(0,201,167,0.08); bottom: -100px; left: -100px; animation: drift 13s ease-in-out infinite reverse; }
+  .blob3 { width: 300px; height: 300px; background: rgba(255,225,53,0.06); top: 50%; left: 50%; transform: translate(-50%,-50%); animation: drift 8s ease-in-out infinite 2s; }
+
+  @keyframes drift {
+    0%, 100% { transform: translate(0,0); }
+    50% { transform: translate(30px, -30px); }
+  }
+
+  /* NAV */
+  nav {
+    padding: 1.5rem 5vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    position: relative;
+    z-index: 10;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: -1px;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .logo span { color: var(--primary); }
+
+  .back-btn {
+    color: rgba(245,240,232,0.5);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--paper); }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 5vw;
+    position: relative;
+    z-index: 10;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,225,53,0.12);
+    border: 1.5px solid rgba(255,225,53,0.3);
+    color: var(--yellow);
+    border-radius: 100px;
+    padding: 0.4rem 1.2rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: clamp(3rem, 8vw, 6.5rem);
+    line-height: 1.0;
+    letter-spacing: -3px;
+    margin-bottom: 1.5rem;
+    animation: fadeUp 0.8s ease both 0.1s;
+  }
+
+  h1 .orange { color: var(--primary); }
+  h1 .green { color: var(--accent); }
+
+  .subtext {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    line-height: 1.7;
+    color: rgba(245,240,232,0.65);
+    max-width: 520px;
+    margin: 0 auto 3rem;
+    animation: fadeUp 0.9s ease both 0.2s;
+  }
+
+  /* EMAIL FORM */
+  .notify-form {
+    display: flex;
+    gap: 0.6rem;
+    max-width: 480px;
+    width: 100%;
+    margin: 0 auto 1.5rem;
+    animation: fadeUp 1s ease both 0.4s;
+  }
+
+  .notify-input {
+    flex: 1;
+    background: rgba(255,255,255,0.07);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 100px;
+    padding: 0.85rem 1.5rem;
+    color: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .notify-input::placeholder { color: rgba(245,240,232,0.35); }
+  .notify-input:focus { border-color: var(--primary); }
+
+  .notify-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    padding: 0.85rem 1.8rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .notify-btn:hover { background: #e04400; transform: scale(1.03); }
+
+  .notify-note {
+    font-size: 0.78rem;
+    color: rgba(245,240,232,0.35);
+    animation: fadeUp 1s ease both 0.5s;
+  }
+
+  /* FEATURES MINI */
+  .mini-features {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 4rem;
+    animation: fadeUp 1s ease both 0.6s;
+  }
+
+  .mini-feat {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 100px;
+    padding: 0.5rem 1.1rem;
+    font-size: 0.82rem;
+    color: rgba(245,240,232,0.65);
+    transition: all 0.2s;
+  }
+
+  .mini-feat:hover {
+    background: rgba(255,77,0,0.1);
+    border-color: rgba(255,77,0,0.3);
+    color: var(--paper);
+  }
+
+  /* SUCCESS MESSAGE */
+  .success-msg {
+    display: none;
+    background: rgba(0,201,167,0.12);
+    border: 1.5px solid rgba(0,201,167,0.3);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 0.8rem 1.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-top: 0.8rem;
+    animation: fadeUp 0.4s ease;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 1.5rem 5vw;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    position: relative;
+    z-index: 10;
+  }
+
+  footer p {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.3);
+  }
+
+  footer a {
+    color: var(--primary);
+    text-decoration: none;
+  }
+
+  footer a:hover { text-decoration: underline; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    .notify-form { flex-direction: column; }
+    .countdown-block { padding: 1rem 1.2rem; min-width: 70px; }
+    .count-num { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="blob blob1"></div>
+<div class="blob blob2"></div>
+<div class="blob blob3"></div>
+
+<nav>
+  <a href="index.html" class="logo">Grade<span>AI</span></a>
+  <a href="index.html" class="back-btn">← Back to Home</a>
+</nav>
+
+<main>
+  <div class="badge">🚀 &nbsp;Launching Soon</div>
+
+  <h1>
+    Something<br>
+    <span class="orange">Big</span> Is<br>
+    <span class="green">Coming.</span>
+  </h1>
+
+  <p class="subtext">
+    GradeAI is almost ready. We're putting the final touches on the most accurate CBSE paper-checking AI ever built for Class 9 & 10 students. Drop your email — you'll be first in line.
+  </p>
+
+  <!-- EMAIL FORM -->
+  <div class="notify-form">
+    <input type="email" class="notify-input" placeholder="Enter your email address" id="emailInput" />
+    <button class="notify-btn" onclick="handleNotify()">Notify Me ✦</button>
+  </div>
+  <p class="notify-note">No spam. Just one email when we launch. Pinky promise. 🤙</p>
+  <div class="success-msg" id="successMsg">🎉 You're on the list! We'll notify you the moment GradeAI goes live.</div>
+
+  <!-- MINI FEATURES -->
+  <div class="mini-features">
+    <div class="mini-feat">📸 Scan Handwritten Answers</div>
+    <div class="mini-feat">🎯 CBSE Examiner Standard</div>
+    <div class="mini-feat">∞ Unlimited Uploads Free</div>
+    <div class="mini-feat">🔑 Missing Keywords Flagged</div>
+    <div class="mini-feat">📐 Presentation Coaching</div>
+    <div class="mini-feat">📊 Weak Subject Tracking</div>
+  </div>
+</main>
+
+<footer>
+  <p>© 2025 GradeAI &nbsp;·&nbsp; Built for Class 9 & 10 CBSE Students &nbsp;·&nbsp; <a href="index.html">Back to Home</a></p>
+</footer>
+
+<script>
+  // Email notify
+  function handleNotify() {
+    const email = document.getElementById('emailInput').value.trim();
+    const msg = document.getElementById('successMsg');
+
+    if (!email || !email.includes('@')) {
+      document.getElementById('emailInput').style.borderColor = '#ef4444';
+      setTimeout(() => {
+        document.getElementById('emailInput').style.borderColor = '';
+      }, 1500);
+      return;
+    }
+
+    // In a real app you'd POST this to your backend
+    msg.style.display = 'block';
+    document.getElementById('emailInput').value = '';
+    document.querySelector('.notify-btn').textContent = "You're In! ✓";
+    document.querySelector('.notify-btn').style.background = '#00c9a7';
+    document.querySelector('.notify-btn').disabled = true;
+  }
+
+  // Enter key triggers notify
+  document.getElementById('emailInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') handleNotify();
+  });
+</script>
+</body>
+</html>
